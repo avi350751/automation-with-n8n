@@ -1,0 +1,235 @@
+{
+  "name": "JIRA_Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -96
+      ],
+      "id": "f6d0ef3b-813d-4850-81b8-66d90352645f",
+      "name": "When chat message received",
+      "webhookId": "f395da7f-d362-42b4-9c77-2b0203eb2ade"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -96
+      ],
+      "id": "29c252d3-ee40-4664-bf39-17994ce672e5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "9b2064ff-e2fd-4f8b-bc94-7d6bea3afaaf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fZgu7Ulw8G1nQpkk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        128
+      ],
+      "id": "de0ad1c6-0ce5-48fd-96be-947257070985",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Eq25Pi63-r8rrJNcTZvheuj5OdNM4-EQcbybLD4r3qU",
+          "mode": "list",
+          "cachedResultName": "QA_Defects",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Eq25Pi63-r8rrJNcTZvheuj5OdNM4-EQcbybLD4r3qU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Eq25Pi63-r8rrJNcTZvheuj5OdNM4-EQcbybLD4r3qU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        128
+      ],
+      "id": "9dd291d0-91a7-46b3-8729-63068d16bb08",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GFQzjGDXCVZk5M1F",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10001",
+          "mode": "list",
+          "cachedResultName": "Order_Ingestion"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10010",
+          "mode": "list",
+          "cachedResultName": "Bug"
+        },
+        "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        352,
+        128
+      ],
+      "id": "aa47c45b-35c0-44ca-905b-2d8968f397bb",
+      "name": "Create an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "GoD5l3gmEBzx7RDw",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sendemailstorick@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        128
+      ],
+      "id": "40e19f5a-12c5-4785-90e9-e3e01b315c0e",
+      "name": "Send a message in Gmail",
+      "webhookId": "07a6bc64-2b41-4223-aa79-521b6be089fa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hQ1mAL6G2ayOR7aP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f63a729f-85cd-4d9e-ba9f-88a51c2d4348",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3963c8f6142cf230867234e1fd4c70486fa217b313369e318f68deb32766f848"
+  },
+  "id": "5isyckECzACmzUfY",
+  "tags": []
+}
