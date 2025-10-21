@@ -1,0 +1,80 @@
+{
+  "name": "Send email",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "ee4b0afa-915e-43f1-a074-b0e0c803b527",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "sendTo": "sendemailstorick@gmail.com",
+        "subject": "n8n Automation",
+        "message": "New to n8n Automation",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        -64
+      ],
+      "id": "1e263804-3148-4c96-9631-c21e1d5d3030",
+      "name": "Send a message",
+      "webhookId": "75f5cc73-7dfb-474b-9042-b90945010f20",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GtlYkpjnyxStKE1i",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Send a message flow",
+        "height": 80,
+        "width": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "55c864ad-3c48-4410-8bd0-f5852b7f1292",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "551da300-26e0-428e-b5b5-2e3a3a2ec354",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3963c8f6142cf230867234e1fd4c70486fa217b313369e318f68deb32766f848"
+  },
+  "id": "PNLc46p4NwK5llpO",
+  "tags": []
+}
