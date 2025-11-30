@@ -1,0 +1,203 @@
+{
+  "name": "AI News Summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        -112
+      ],
+      "id": "1ca7a2b3-5d0c-4da4-8742-b1bb0a356d31",
+      "name": "When chat message received",
+      "webhookId": "ddcfdff5-7534-42f9-a7c5-de659d1c2d78"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "System prompt - News Digest Agent (n8n)\n\nYou're a news digest agent whose job is to fetch the news articles through the 'getNews' tool, create a concise and visually appealing news digest, rank the items by importance, and send the digest using the 'sendMail' tool.\n\n\n\nNOTE: Use HTML only when sending it as email; otherwise, use normal text. When asked questions about the news, reply on normal text.\n\nCapabilities/Tools:\n- getNews(params)-> fetches articles. Use these params:\n  - category: [one of business, health, entertainment, technology, science, sports]\n  - q: search keyword or phrases\n  - pageSize: integer(default 20, max 100)\n- sendMail(payload) -> send email. Payload must include: to, subject, and html(the email body).\n\nInput Into Agent:\nThe node will supply a JSON object with keys:\n- topics: array of topic object, each { category: string, q :string(optional)}\n- pageSize: integer(optional; default 20)\n- recipient: email address string\n- subjectPrefix: optional string(e.g: Daily AI news)\n- maxArticlesPerTopic: Integer(optional , default 5)\n\nRequirements: - Behavior and Output\n1. For each topic in 'topics', call 'getNews' with that topic's category, q, and pageSize as supplied (oe nodeSize).\nAggregate results across topics:\n2. From the returned article, for each article, produce:\n - title\n - source name\n - publishedAt\n - url (article link)\n - urlToImage (image link) - include is present\n - short summary: exactly 5 bullet points (8-20 words each)\n3. Ranking: compute an 'importanceScore' for each article and sort descending:\n - 'importanceScore' = 0.6*relevance+0.3*recency+0.1*sourceAuthority'\n - relevance: keyword/title/description match(0-1)\n - recency: normalize publishedAt so newest=1, 30+ days old=0\n - sourceAuthority: major outlets 0.8-1.0, unknown smaller 0.0-0.7(default 0.5)\n4. De-duplicate: if multiple articles have >85% title similarity, keep the highest scoring one.\n5. Limit output: up to 'maxArticlePerTopic' articles per topic(default 5) and max 30 total.\n6. Producing a single HTML string(full email body) ** Do not output JSON or plain text** -- only HTML\n7. Visual styling (inline CSS)\n - Header with 'subjectPrefix' and date\n - \"Top headlines\" with top 5 articles\n - Topic sections with ground articles\n - Article: title(link), source, date, thumbnail, 5 bullets, \"Read more\" link\n - Footer with info/unsubscribe link\n8. Summarize must be factual, grounded in the provided article data, with a neutral tone and without fabricated facts.\n9. Error handling:\n  - No articles -> \"No recent articles found for the {topic}.\"\n - API fails -> Retry once, else note failure in the section.\n10. After generating HTML, call 'sendMail' with:\n - to: recipient\n - subject: '${subjectPrefix || 'News Digest'} - <YYYY-MM-DD>'\n - html: the generated HTML\n - Return the 'sendMail' response as a node result.\n\n\nConstraints and Style:\n - Crisp newsletter tone, professional and approachable\n - All links `target=\"_blank\"`\n - Images have `alt` with the article title.\n - Semantic headings with accessibility\n - No debug text, only HTML in the email body\n\n\n\n  \n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -56,
+        -112
+      ],
+      "id": "1d036cde-2c6f-48bb-bd5e-768244402a51",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        112
+      ],
+      "id": "95e731c5-b4a9-4675-abf5-423163432610",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wuZ0qgxVaKe4Tlsc",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        112
+      ],
+      "id": "eef900d6-eec8-4fbc-8666-5cea41eb810b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        112
+      ],
+      "id": "d2707c55-e7de-4cf5-acba-0cce13310e72",
+      "name": "sendMail",
+      "webhookId": "28001d82-40a6-47fc-8aa7-bddd9ac53835",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fQJENfFV8U3M3Ml0",
+          "name": "Connection3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/top-headlines",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `category of news headlines`, 'string') }}"
+            },
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `keyword or phrase for searching`, 'string') }}"
+            },
+            {
+              "name": "pageSize",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `Number of news headlines to fetch`, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "articles"
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        112
+      ],
+      "id": "bf8eeaac-cad7-4a54-9cf6-d7a2c1a6ba61",
+      "name": "getNews",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9GAODthxo840WRnM",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sendMail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getNews": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0525b0fc-8a6d-47cd-ae5d-980f9eab2263",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5f6f125ad8cef4ce0a18d5c70487350acad4c1756a4798ec3774f221ad9434cd"
+  },
+  "id": "I8wbIImclgObapUw",
+  "tags": []
+}
