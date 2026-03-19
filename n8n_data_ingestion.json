@@ -1,0 +1,218 @@
+{
+  "name": "n8n_data_ingestion",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -16
+      ],
+      "id": "54e02886-f467-4811-91ef-9017135ca852",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UD8TE3dKsdf0ga7u9U__h0VR3XDHiuj5zTcmxWw3-AQ",
+          "mode": "list",
+          "cachedResultName": "Product_List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UD8TE3dKsdf0ga7u9U__h0VR3XDHiuj5zTcmxWw3-AQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UD8TE3dKsdf0ga7u9U__h0VR3XDHiuj5zTcmxWw3-AQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "11a0e0be-6208-48eb-9c4d-345281d57815",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NalhKivhRa8CDdVC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5bc820fd-0405-46fe-9228-36dc40676021",
+              "name": "content",
+              "value": "=Product name: {{ $json.Name }}\nCategory: {{ $json.Category }}\nSKU: {{ $json.SKU }}\nPrice: ${{ $json.Price }}\nDescription: {{ $json.Description }}",
+              "type": "string"
+            },
+            {
+              "id": "441833fc-dea7-4cb2-8ff5-42e614f1e35f",
+              "name": "category",
+              "value": "={{ $json.Category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        -16
+      ],
+      "id": "0fda39d9-1e74-4522-b4cd-ee089c16aede",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "knowledgebase",
+          "mode": "list",
+          "cachedResultName": "knowledgebase"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "ebb2a0fb-a2e1-413c-85c0-f8f8dc8882cd",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "1pjyIosreRbz0vZe",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        176
+      ],
+      "id": "1494b3af-44ff-437e-baf4-1c776cf26ce5",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mTjlAibf3yKSwRdi",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "category",
+                "value": "={{ $json.category }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        176
+      ],
+      "id": "07afbf8d-6131-4347-8cbe-1d3d29f2848f",
+      "name": "Default Data Loader"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "476742a7-0c05-40e5-b895-83acad4d9fd0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5cd4d619f08570ea0b7b9bc9e9f79d299d26355370050bdc49540532535d16db"
+  },
+  "id": "xPpN63RrK4gybm9X",
+  "tags": []
+}
