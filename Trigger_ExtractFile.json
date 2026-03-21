@@ -1,0 +1,117 @@
+{
+  "name": "Trigger_ExtractFile",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1yv5rjXgAVHfv2fUfu-e6UFle4MDWR9Oj",
+          "mode": "list",
+          "cachedResultName": "AI_Engineering",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1yv5rjXgAVHfv2fUfu-e6UFle4MDWR9Oj"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4ee889fc-983b-4e1e-9b6e-f0322f1814b6",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AjyeKSAARyV4dRBw",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{$json.id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1044d309-7608-47b6-bac5-18fc7440f351",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AjyeKSAARyV4dRBw",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "24a56ece-f338-4119-b958-42d889e30814",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b053322e-670d-40dc-92a4-943372cc8529",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5cd4d619f08570ea0b7b9bc9e9f79d299d26355370050bdc49540532535d16db"
+  },
+  "id": "j1C8zKBKkhovl0zc",
+  "tags": []
+}
