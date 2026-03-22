@@ -1,0 +1,177 @@
+{
+  "name": "firecrawl_integration",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -608,
+        -128
+      ],
+      "id": "984c0fa7-4186-4494-90f8-ab6e6aff7bd9",
+      "name": "When chat message received",
+      "webhookId": "f3cef718-de02-4bdd-83b9-ef11dd2248de"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You come up with a search query for an internet search to best answer a user's question."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -328,
+        -128
+      ],
+      "id": "79b1523e-7125-49f5-b736-04a7ecd8f05b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        64
+      ],
+      "id": "ab8bdcff-5ccb-42fb-bd04-7a1414b78c2c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mPvcZSJLRmV6kNVU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        48
+      ],
+      "id": "a07ba99c-57bc-4170-98cf-668627b1004b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"search_query\": \"an internet search\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        96
+      ],
+      "id": "6e8480d7-fb39-43a6-b13f-8caa7be33cbd",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "resource": "MapSearch",
+        "operation": "search",
+        "query": "={{ $json.output.search_query }}",
+        "requestOptions": {}
+      },
+      "type": "@mendable/n8n-nodes-firecrawl.firecrawl",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -128
+      ],
+      "id": "c51d120b-ee55-4a09-a120-13534416c27a",
+      "name": "/search",
+      "credentials": {
+        "firecrawlApi": {
+          "id": "JK9QGRPZkPI7aAOr",
+          "name": "Firecrawl account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "/search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8b63baf9-fbc1-4fd8-a0c8-d709893fea86",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eac829024743674587c116f707ae2d132145003ecc712927930bbfe85a622c12"
+  },
+  "id": "a544MhehxpHSdWVl",
+  "tags": []
+}
